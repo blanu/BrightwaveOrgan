@@ -7,7 +7,7 @@ Voice::Voice(short waveType): waveType(waveType)
 { 
   Serial.println("Voice constructor");
 
-  wave.begin(1.0, tone.hertz, waveType);
+  wave.begin(0.5, tone.hertz, waveType);
   
   env.attack(9.2);
   env.hold(2.1);

@@ -81,7 +81,7 @@ void setupAudio()
 {
   AudioMemory(20);
   codec.enable();
-  codec.volume(1.0);    
+  codec.volume(0.75);    
 
   AudioProcessorUsageMaxReset();
   AudioMemoryUsageMaxReset();

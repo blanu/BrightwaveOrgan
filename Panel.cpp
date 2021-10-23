@@ -69,7 +69,7 @@ void Panel::setupButtons()
     return;
   }
 
-  if (!redArcadeButton.begin(0x6E))
+  if (!redArcadeButton.begin(0x6F))
   {
     Serial.println("Red arcade button FAIL");
     return;
@@ -157,16 +157,16 @@ void Panel::process()
     koro.vento.rising = true;
   }
 
-//  bool newRedArcadeButtonIsPressed = redArcadeButton.isPressed();
-//  if (newRedArcadeButtonIsPressed != redArcadeButtonIsPressed)
-//  {
-//    redArcadeButtonIsPressed = newRedArcadeButtonIsPressed;
-//    
-//    update = true;
-//    trigger = true;
-//    gate = redArcadeButtonIsPressed;
-//    koro.vento.rising = false;
-//  }
+  bool newRedArcadeButtonIsPressed = redArcadeButton.isPressed();
+  if (newRedArcadeButtonIsPressed != redArcadeButtonIsPressed)
+  {
+    redArcadeButtonIsPressed = newRedArcadeButtonIsPressed;
+    
+    update = true;
+    trigger = true;
+    gate = redArcadeButtonIsPressed;
+    koro.vento.rising = false;
+  }
 
   if (rejoy)
   {
