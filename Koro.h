@@ -18,7 +18,7 @@ class Koro
 
     Stela fundamental = Stela(7, 0.0);
     Stela last = fundamental;
-    Vento vento = Vento(true);
+    Vento vento = Vento();
     
     void setShift(int newShift);
     

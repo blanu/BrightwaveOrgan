@@ -154,7 +154,6 @@ void Panel::process()
     update = true;
     trigger = true;
     gate = blueArcadeButtonIsPressed;
-    koro.vento.rising = true;
   }
 
   bool newRedArcadeButtonIsPressed = redArcadeButton.isPressed();
@@ -165,7 +164,6 @@ void Panel::process()
     update = true;
     trigger = true;
     gate = redArcadeButtonIsPressed;
-    koro.vento.rising = false;
   }
 
   if (rejoy)
@@ -230,15 +228,6 @@ void Panel::updateDisplay()
   else
   {
     lcd.print("O");    
-  }
-
-  if (koro.vento.rising)
-  {
-    lcd.print("+");
-  }
-  else
-  {
-    lcd.print("-");
   }
 
   if (octaveLock)

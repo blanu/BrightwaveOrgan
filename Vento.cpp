@@ -1,11 +1,11 @@
 #include <Arduino.h>
 #include "Vento.h"
 
-Vento::Vento(bool rising): rising(rising), tri(0), kvin(0)
+Vento::Vento(): du(0), tri(0), kvin(0), sep(0)
 {  
 }
 
-Vento::Vento(bool rising, int tri, int kvin): rising(rising), tri(tri), kvin(kvin)
+Vento::Vento(int du, int tri, int kvin, int sep): du(du), tri(tri), kvin(kvin), sep(sep)
 {
 }
 
@@ -52,50 +52,9 @@ Stela Vento::getStela(Stela fundamental)
   return fundamental.multiply(ratio);
 }
 
-Stela Vento::getRising(Stela fundamental, Stela reference)
-{
-  Stela result = getStela(fundamental);
-
-  while (result.getStela() > reference.getStela())
-  {
-    result.setGrado(result.grado - 1);
-  }
-
-  while (result.getStela() < reference.getStela())
-  {
-    result.setGrado(result.grado + 1);
-  }
-
-  return result;
-}
-
-Stela Vento::getFalling(Stela fundamental, Stela reference)
-{
-  Stela result = getStela(fundamental);
-
-  while (result.getStela() < reference.getStela())
-  {
-    result.setGrado(result.grado + 1);
-  }
-
-  while (result.getStela() > reference.getStela())
-  {
-    result.setGrado(result.grado - 1);
-  }
-
-  return result;
-}
-
 Stela Vento::getTone(Stela fundamental, Stela reference)
 {
-  if (rising)
-  {
-    return getRising(fundamental, reference);    
-  }
-  else
-  {
-    return getFalling(fundamental, reference);    
-  }
+  return getStela(fundamental);
 }
 
 void Vento::shiftTri(int shift)
@@ -106,4 +65,24 @@ void Vento::shiftTri(int shift)
 void Vento::shiftKvin(int shift)
 {
   kvin = kvin + shift;  
+}
+
+bool Vento::operator==(const Vento& rhs) const
+{
+  if (du != rhs.du) {return false;}
+  if (tri != rhs.tri) {return false;}
+  if (kvin != rhs.kvin) {return false;}
+  if (sep != rhs.sep) {return false;}
+
+  return true;
+}
+
+bool Vento::operator!=(const Vento& rhs) const
+{
+  if (du == rhs.du) {return true;}
+  if (tri == rhs.tri) {return true;}
+  if (kvin == rhs.kvin) {return true;}
+  if (sep == rhs.sep) {return true;}
+
+  return false;
 }

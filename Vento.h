@@ -7,13 +7,14 @@
 class Vento
 {
   public:
-    Vento(bool rising);
-    Vento(bool rising, int tri, int kvin);
+    Vento();
+    Vento(int du, int tri, int kvin, int sep);
     virtual ~Vento();
 
-    bool rising;
+    int du;
     int tri;
     int kvin;
+    int sep;
 
     Ratio getRatio();
     Stela getStela(Stela fundamental);
@@ -23,6 +24,9 @@ class Vento
 
     void shiftTri(int shift);
     void shiftKvin(int shift);
+
+    bool operator==(const Vento& rhs) const;
+    bool operator!=(const Vento& rhs) const;
 
   private:
 };
