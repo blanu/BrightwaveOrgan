@@ -9,6 +9,7 @@
 #include "Panel.h"
 #include "Synthesizer.h"
 #include "Controller.h"
+#include "StringVoice.h"
 
 KEYPAD keypad; //Create instance of this object
 
@@ -28,38 +29,63 @@ uint16_t arko = 0;
 
 AudioControlSGTL5000 codec;
 AudioOutputI2S output;
+AudioOutputUSB outputUSB; 
 
-AudioMixer4 leftMixer;  AudioConnection leftMixerPatch(leftMixer, 0, output, 0);
-AudioMixer4 rightMixer; AudioConnection rightMixerPatch(rightMixer, 0, output, 1);
+AudioMixer4 leftMixer;  AudioConnection leftMixerPatch(leftMixer, 0, outputUSB, 0);
+AudioMixer4 rightMixer; AudioConnection rightMixerPatch(rightMixer, 0, outputUSB, 1);
 
 AudioMixer4 mixer0; AudioConnection mixer0Patch(mixer0, 0, leftMixer, 0);
 AudioMixer4 mixer1; AudioConnection mixer1Patch(mixer1, 0, leftMixer, 1);
 AudioMixer4 mixer2; AudioConnection mixer2Patch(mixer2, 0, rightMixer, 0);
 AudioMixer4 mixer3; AudioConnection mixer3Patch(mixer3, 0, rightMixer, 1);
 
-Voice voices[16] = {
-  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
-  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
-  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
-  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE)
+//Voice voices[16] = {
+//  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
+//  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
+//  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
+//  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE)
+//};
+
+StringVoice voices[16] = {
+  StringVoice(), StringVoice(), StringVoice(), StringVoice(),
+  StringVoice(), StringVoice(), StringVoice(), StringVoice(),
+  StringVoice(), StringVoice(), StringVoice(), StringVoice(),
+  StringVoice(), StringVoice(), StringVoice(), StringVoice()
 };
 
-AudioConnection voice0WavePatch(voices[0].wave, 0, voices[0].env, 0); AudioConnection voice0EnvPatch(voices[0].env, 0, mixer0, 0);
-AudioConnection voice1WavePatch(voices[1].wave, 0, voices[1].env, 0); AudioConnection voice1EnvPatch(voices[1].env, 0, mixer0, 1);
-AudioConnection voice2WavePatch(voices[2].wave, 0, voices[2].env, 0); AudioConnection voice2EnvPatch(voices[2].env, 0, mixer0, 2);
-AudioConnection voice3WavePatch(voices[3].wave, 0, voices[3].env, 0); AudioConnection voice3EnvPatch(voices[3].env, 0, mixer0, 3);
-AudioConnection voice4WavePatch(voices[4].wave, 0, voices[4].env, 0); AudioConnection voice4EnvPatch(voices[4].env, 0, mixer1, 0);
-AudioConnection voice5WavePatch(voices[5].wave, 0, voices[5].env, 0); AudioConnection voice5EnvPatch(voices[5].env, 0, mixer1, 1);
-AudioConnection voice6WavePatch(voices[6].wave, 0, voices[6].env, 0); AudioConnection voice6EnvPatch(voices[6].env, 0, mixer1, 2);
-AudioConnection voice7WavePatch(voices[7].wave, 0, voices[7].env, 0); AudioConnection voice7EnvPatch(voices[7].env, 0, mixer1, 3);
-AudioConnection voice8WavePatch(voices[8].wave, 0, voices[8].env, 0); AudioConnection voice8EnvPatch(voices[8].env, 0, mixer2, 0);
-AudioConnection voice9WavePatch(voices[9].wave, 0, voices[9].env, 0); AudioConnection voice9EnvPatch(voices[9].env, 0, mixer2, 1);
-AudioConnection voice10WavePatch(voices[10].wave, 0, voices[10].env, 0); AudioConnection voice10EnvPatch(voices[10].env, 0, mixer2, 2);
-AudioConnection voice11WavePatch(voices[11].wave, 0, voices[11].env, 0); AudioConnection voice11EnvPatch(voices[11].env, 0, mixer2, 3);
-AudioConnection voice12WavePatch(voices[12].wave, 0, voices[12].env, 0); AudioConnection voice12EnvPatch(voices[12].env, 0, mixer3, 0);
-AudioConnection voice13WavePatch(voices[13].wave, 0, voices[13].env, 0); AudioConnection voice13EnvPatch(voices[13].env, 0, mixer3, 1);
-AudioConnection voice14WavePatch(voices[14].wave, 0, voices[14].env, 0); AudioConnection voice14EnvPatch(voices[14].env, 0, mixer3, 2);
-AudioConnection voice15WavePatch(voices[15].wave, 0, voices[15].env, 0); AudioConnection voice15EnvPatch(voices[15].env, 0, mixer3, 3);
+//AudioConnection voice0WavePatch(voices[0].wave, 0, voices[0].env, 0); AudioConnection voice0EnvPatch(voices[0].env, 0, mixer0, 0);
+//AudioConnection voice1WavePatch(voices[1].wave, 0, voices[1].env, 0); AudioConnection voice1EnvPatch(voices[1].env, 0, mixer0, 1);
+//AudioConnection voice2WavePatch(voices[2].wave, 0, voices[2].env, 0); AudioConnection voice2EnvPatch(voices[2].env, 0, mixer0, 2);
+//AudioConnection voice3WavePatch(voices[3].wave, 0, voices[3].env, 0); AudioConnection voice3EnvPatch(voices[3].env, 0, mixer0, 3);
+//AudioConnection voice4WavePatch(voices[4].wave, 0, voices[4].env, 0); AudioConnection voice4EnvPatch(voices[4].env, 0, mixer1, 0);
+//AudioConnection voice5WavePatch(voices[5].wave, 0, voices[5].env, 0); AudioConnection voice5EnvPatch(voices[5].env, 0, mixer1, 1);
+//AudioConnection voice6WavePatch(voices[6].wave, 0, voices[6].env, 0); AudioConnection voice6EnvPatch(voices[6].env, 0, mixer1, 2);
+//AudioConnection voice7WavePatch(voices[7].wave, 0, voices[7].env, 0); AudioConnection voice7EnvPatch(voices[7].env, 0, mixer1, 3);
+//AudioConnection voice8WavePatch(voices[8].wave, 0, voices[8].env, 0); AudioConnection voice8EnvPatch(voices[8].env, 0, mixer2, 0);
+//AudioConnection voice9WavePatch(voices[9].wave, 0, voices[9].env, 0); AudioConnection voice9EnvPatch(voices[9].env, 0, mixer2, 1);
+//AudioConnection voice10WavePatch(voices[10].wave, 0, voices[10].env, 0); AudioConnection voice10EnvPatch(voices[10].env, 0, mixer2, 2);
+//AudioConnection voice11WavePatch(voices[11].wave, 0, voices[11].env, 0); AudioConnection voice11EnvPatch(voices[11].env, 0, mixer2, 3);
+//AudioConnection voice12WavePatch(voices[12].wave, 0, voices[12].env, 0); AudioConnection voice12EnvPatch(voices[12].env, 0, mixer3, 0);
+//AudioConnection voice13WavePatch(voices[13].wave, 0, voices[13].env, 0); AudioConnection voice13EnvPatch(voices[13].env, 0, mixer3, 1);
+//AudioConnection voice14WavePatch(voices[14].wave, 0, voices[14].env, 0); AudioConnection voice14EnvPatch(voices[14].env, 0, mixer3, 2);
+//AudioConnection voice15WavePatch(voices[15].wave, 0, voices[15].env, 0); AudioConnection voice15EnvPatch(voices[15].env, 0, mixer3, 3);
+
+AudioConnection voice0EnvPatch(voices[0].wave, 0, mixer0, 0);
+AudioConnection voice1EnvPatch(voices[1].wave, 0, mixer0, 1);
+AudioConnection voice2EnvPatch(voices[2].wave, 0, mixer0, 2);
+AudioConnection voice3EnvPatch(voices[3].wave, 0, mixer0, 3);
+AudioConnection voice4EnvPatch(voices[4].wave, 0, mixer1, 0);
+AudioConnection voice5EnvPatch(voices[5].wave, 0, mixer1, 1);
+AudioConnection voice6EnvPatch(voices[6].wave, 0, mixer1, 2);
+AudioConnection voice7EnvPatch(voices[7].wave, 0, mixer1, 3);
+AudioConnection voice8EnvPatch(voices[8].wave, 0, mixer2, 0);
+AudioConnection voice9EnvPatch(voices[9].wave, 0, mixer2, 1);
+AudioConnection voice10EnvPatch(voices[10].wave, 0, mixer2, 2);
+AudioConnection voice11EnvPatch(voices[11].wave, 0, mixer2, 3);
+AudioConnection voice12EnvPatch(voices[12].wave, 0, mixer3, 0);
+AudioConnection voice13EnvPatch(voices[13].wave, 0, mixer3, 1);
+AudioConnection voice14EnvPatch(voices[14].wave, 0, mixer3, 2);
+AudioConnection voice15EnvPatch(voices[15].wave, 0, mixer3, 3);
 
 float calculateStela(uint16_t grado, uint16_t arko)
 {
@@ -104,40 +130,40 @@ void setupAudio()
 {
   AudioMemory(20);
   codec.enable();
-  codec.volume(0.75);    
+  codec.volume(0.45);    
 
   AudioProcessorUsageMaxReset();
   AudioMemoryUsageMaxReset();
 
-  leftMixer.gain(0, 0.5);
-  leftMixer.gain(1, 0.5);
+  leftMixer.gain(0, 0.36);
+  leftMixer.gain(1, 0.36);
   leftMixer.gain(2, 0.0);
   leftMixer.gain(3, 0.0);
   
-  rightMixer.gain(0, 0.5);
-  rightMixer.gain(1, 0.5);
+  rightMixer.gain(0, 0.36);
+  rightMixer.gain(1, 0.36);
   rightMixer.gain(2, 0.0);
   rightMixer.gain(3, 0.0);
 
-  mixer0.gain(0, 0.25);
-  mixer0.gain(1, 0.25);
-  mixer0.gain(2, 0.25);
-  mixer0.gain(3, 0.25);
+  mixer0.gain(0, 0.75);
+  mixer0.gain(1, 0.75);
+  mixer0.gain(2, 0.75);
+  mixer0.gain(3, 0.75);
 
-  mixer1.gain(0, 0.25);
-  mixer1.gain(1, 0.25);
-  mixer1.gain(2, 0.25);
-  mixer1.gain(3, 0.25);  
+  mixer1.gain(0, 0.75);
+  mixer1.gain(1, 0.75);
+  mixer1.gain(2, 0.75);
+  mixer1.gain(3, 0.75);  
 
-  mixer2.gain(0, 0.25);
-  mixer2.gain(1, 0.25);
-  mixer2.gain(2, 0.25);
-  mixer2.gain(3, 0.25);
+  mixer2.gain(0, 0.75);
+  mixer2.gain(1, 0.75);
+  mixer2.gain(2, 0.75);
+  mixer2.gain(3, 0.75);
 
-  mixer3.gain(0, 0.25);
-  mixer3.gain(1, 0.25);
-  mixer3.gain(2, 0.25);
-  mixer3.gain(3, 0.25);
+  mixer3.gain(0, 0.75);
+  mixer3.gain(1, 0.75);
+  mixer3.gain(2, 0.75);
+  mixer3.gain(3, 0.75);
   
   Serial.println("Setup Audio OK");
 }
@@ -280,6 +306,7 @@ void loop()
       }
 
     case poly:
+    { // Curlies requied to allow a variable declaration inside a case    
       for (int index = 0; index < 16; index++)
       {
         if (controller.changed[index])
@@ -298,130 +325,10 @@ void loop()
       }
       
       controller.resetChanged();    
-
+    }
     default:
       return;
   }
-}
-
-void modeStartup()
-{
-//  if (redButton.isPressed())
-//  {
-//    redButton.LEDon(redButtonBrightness);
-//    mode = StartingTuning;
-//  }
-//  else
-//  {
-////    synth.on(0);
-//    AudioInterrupts();
-//
-//    delay(1000);
-//
-////    synth.off(0);
-//  }
-}
-
-void modeStartingTuning()
-{
-//  // Waiting for button to release so that we can push it again to toggle out of tuning mode
-//  if (!redButton.isPressed())
-//  {
-//    tuningBuffer = "";
-//    mode = Tuning;    
-//  }
-}
-
-void modeTuning()
-{
-//  // Check if the tuning mode button has been toggled, indicating that we should leave tuning mode.
-//  if (redButton.isPressed())
-//  {
-//    mode = ExitingTuning;
-//  }
-//  else // Do some tuning!
-//  {
-//    keypad.updateFIFO();  // necessary for keypad to pull button from stack to readable register
-//    char button = keypad.getButton();
-//    
-//    if (button != -1 && button != 0)
-//    {
-//      if (button == '#')
-//      {
-//        if (tuningBuffer.length() > 0)
-//        {
-//          if (tuningBuffer.length() == 2)
-//          {
-//            tuningBuffer.append("0");
-//          }
-//          
-//          setExactTuning(tuningBuffer);        
-//        }
-//      }
-//      else if (button == '*')
-//      {
-//        // ???
-//      }
-//      else // Numeric
-//      {
-//        tuningBuffer.append(button);
-//        if (tuningBuffer.length() == 5)
-//        {
-//          setExactTuning(tuningBuffer);
-//        }
-//        else if(tuningBuffer.length() == 1)
-//        {
-//          // Add decimal point after first digit
-//          tuningBuffer.append('.');
-//        }
-//      }
-//    }
-//     
-//    byte gradoOffset = panel.encoderA.getCount();
-//    if (gradoOffset != 0)
-//    {
-//      byte newGrado = grado + gradoOffset;
-//      if (newGrado > 14)
-//      {
-//        newGrado = 14;
-//      }
-//  
-//      if(newGrado < 1)
-//      {
-//        newGrado = 1;
-//      }
-//
-//      if (newGrado != grado)
-//      {
-//        setGrado(newGrado);
-//      }
-//    }
-//
-//    byte arkoOffset = panel.encoderB.getCount();
-//    if (arkoOffset != 0)
-//    {
-//      uint16_t newArko = arko + arkoOffset;
-//      if (newArko > 10000)
-//      {
-//        newArko = newArko - 10000;
-//      }
-//
-//      if (newArko < 0)
-//      {
-//        newArko = newArko + 10000;
-//      }
-//
-//      if (newArko != arko)
-//      {
-//        setArko(newArko);
-//      }
-//    }
-//  }
-}
-
-void modePlay()
-{
-  
 }
 
 void setGrado(byte newGrado)
