@@ -205,7 +205,7 @@ void Panel::updateDisplay()
   lcd.print(" ");
   lcd.print(ratio.denominator);
 
-  Stela tone = koro.vento.getTone(koro.fundamental, koro.last);
+  Stela tone = koro.vento.getTone(koro.fundamental);
   lcd.setCursor(11, 2);
   lcd.print("Hz");
   lcd.setCursor(14, 2);

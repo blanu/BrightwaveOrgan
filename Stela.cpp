@@ -30,6 +30,11 @@ void Stela::setGrado(int newGrado)
   hertz = pow(2, stela);  
 }
 
+void Stela::shiftGrado(int shift)
+{
+  setGrado(grado + shift);
+}
+
 void Stela::setArko(float newArko)
 {
   arko = newArko;

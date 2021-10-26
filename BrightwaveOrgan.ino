@@ -166,7 +166,7 @@ void loop()
     panel.retune = false;
 
     // Ignore vento rising/falling on retune.
-    Stela tone = panel.koro.vento.getStela(panel.koro.fundamental);
+    Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
     voice1.setTone(tone);    
 
     // If we can hear the retuned note, then it becomes the last note we heard.
@@ -179,7 +179,7 @@ void loop()
   if (panel.reratio)
   {
     // When we change the vento, we take into account the vento rising/falling.
-    Stela tone = panel.koro.vento.getTone(panel.koro.fundamental, panel.koro.last);
+    Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
     voice1.setTone(tone);    
 
     // If we can hear the reratioed note, then it becomes the last note we heard.
@@ -195,7 +195,7 @@ void loop()
 
     if (panel.gate)
     {
-      Stela tone = panel.koro.vento.getTone(panel.koro.fundamental, panel.koro.last);
+      Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
       voice1.setTone(tone);
       panel.koro.last = tone;
       
@@ -219,7 +219,34 @@ void loop()
   {
     if (controller.voices[0].on)
     {
-      Stela tone = controller.voices[0].vento.getStela(koro.fundamental);
+//      panel.lcd.setCursor(0, 1);
+//      panel.lcd.print("Vento ");
+//      panel.lcd.print(controller.voices[0].vento.du);
+//      panel.lcd.print(" ");
+//      panel.lcd.print(controller.voices[0].vento.tri);
+//      panel.lcd.print(" ");
+//      panel.lcd.print(controller.voices[0].vento.kvin);
+//      panel.lcd.print(" ");
+//      panel.lcd.print(controller.voices[0].vento.sep);
+//      panel.lcd.print("Fundamental ");
+//      panel.lcd.print(panel.koro.fundamental.getStela());
+      
+      Stela tone = controller.voices[0].vento.getTone(panel.koro.fundamental);
+
+//      panel.lcd.setCursor(0, 2);
+//      panel.lcd.print("Grado ");
+//      panel.lcd.print(panel.koro.fundamental.grado);
+//      panel.lcd.print(" ");
+//      panel.lcd.print(tone.grado);
+
+//      panel.lcd.setCursor(0, 3);
+//      panel.lcd.print("Stela ");
+//      panel.lcd.print(panel.koro.fundamental.getStela());
+//      panel.lcd.print(" ");
+//      panel.lcd.print(tone.getStela());
+//      panel.lcd.print(" ");
+//      panel.lcd.print(panel.koro.fundamental.getStela() < tone.getStela());
+      
       voice1.setTone(tone);
       voice1.on();
     }
@@ -231,7 +258,7 @@ void loop()
     controller.resetChanged();
   }
 
-  delay(100);
+//  delay(100);
 }
 
 void modeStartup()

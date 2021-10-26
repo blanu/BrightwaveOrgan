@@ -20,7 +20,7 @@ class Vento
     Stela getStela(Stela fundamental);
     Stela getRising(Stela fundamental, Stela reference);
     Stela getFalling(Stela fundamental, Stela reference);
-    Stela getTone(Stela fundamental, Stela reference);
+    Stela getTone(Stela fundamental);
 
     void shiftTri(int shift);
     void shiftKvin(int shift);

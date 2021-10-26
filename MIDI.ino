@@ -6,13 +6,13 @@ void handleNoteOff(byte channel, byte note, byte velocity)
 void handleNoteOn(byte channel, byte note, byte velocity)
 {
   controller.handleNoteOn(channel, note, velocity);
-  panel.lcd.clear();
-  panel.lcd.print("NoteOn ");
-  panel.lcd.print(channel);
-  panel.lcd.print(" ");
-  panel.lcd.print(note);
-  panel.lcd.print(" ");
-  panel.lcd.print(velocity);
+//  panel.lcd.clear();
+//  panel.lcd.print("NoteOn ");
+//  panel.lcd.print(channel);
+//  panel.lcd.print(" ");
+//  panel.lcd.print(note);
+//  panel.lcd.print(" ");
+//  panel.lcd.print(velocity);
 }
 
 void handleAfterTouchPoly(byte channel, byte note, byte velocity)

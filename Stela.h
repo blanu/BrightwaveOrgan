@@ -17,6 +17,8 @@ class Stela
 
     void setGrado(int newGrado);
     void setArko(float newArko);
+
+    void shiftGrado(int shift);
     
     float getStela();
     void setStela(float newStela);
