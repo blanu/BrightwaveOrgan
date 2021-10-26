@@ -9,15 +9,6 @@
 #include "Panel.h"
 #include "Synthesizer.h"
 #include "Controller.h"
-#include "MIDI.h"
-
-//byte redButtonAddress = 0x5B;
-//byte greenButtonAddress = 0x6F;
-//
-//int redButtonBrightness = 0xFF;
-//
-//QwiicButton redButton;
-//QwiicButton greenButton;
 
 KEYPAD keypad; //Create instance of this object
 
@@ -41,7 +32,34 @@ AudioOutputI2S output;
 AudioMixer4 leftMixer;  AudioConnection leftMixerPatch(leftMixer, 0, output, 0);
 AudioMixer4 rightMixer; AudioConnection rightMixerPatch(rightMixer, 0, output, 1);
 
-Voice voice1(WAVEFORM_SINE); AudioConnection voice1WavePatch(voice1.wave, 0, voice1.env, 0); AudioConnection voice1EnvPatch(voice1.env, 0, leftMixer, 0);
+AudioMixer4 mixer0; AudioConnection mixer0Patch(mixer0, 0, leftMixer, 0);
+AudioMixer4 mixer1; AudioConnection mixer1Patch(mixer1, 0, leftMixer, 1);
+AudioMixer4 mixer2; AudioConnection mixer2Patch(mixer2, 0, rightMixer, 0);
+AudioMixer4 mixer3; AudioConnection mixer3Patch(mixer3, 0, rightMixer, 1);
+
+Voice voices[16] = {
+  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
+  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
+  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE),
+  Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE), Voice(WAVEFORM_SINE)
+};
+
+AudioConnection voice0WavePatch(voices[0].wave, 0, voices[0].env, 0); AudioConnection voice0EnvPatch(voices[0].env, 0, mixer0, 0);
+AudioConnection voice1WavePatch(voices[1].wave, 0, voices[1].env, 0); AudioConnection voice1EnvPatch(voices[1].env, 0, mixer0, 1);
+AudioConnection voice2WavePatch(voices[2].wave, 0, voices[2].env, 0); AudioConnection voice2EnvPatch(voices[2].env, 0, mixer0, 2);
+AudioConnection voice3WavePatch(voices[3].wave, 0, voices[3].env, 0); AudioConnection voice3EnvPatch(voices[3].env, 0, mixer0, 3);
+AudioConnection voice4WavePatch(voices[4].wave, 0, voices[4].env, 0); AudioConnection voice4EnvPatch(voices[4].env, 0, mixer1, 0);
+AudioConnection voice5WavePatch(voices[5].wave, 0, voices[5].env, 0); AudioConnection voice5EnvPatch(voices[5].env, 0, mixer1, 1);
+AudioConnection voice6WavePatch(voices[6].wave, 0, voices[6].env, 0); AudioConnection voice6EnvPatch(voices[6].env, 0, mixer1, 2);
+AudioConnection voice7WavePatch(voices[7].wave, 0, voices[7].env, 0); AudioConnection voice7EnvPatch(voices[7].env, 0, mixer1, 3);
+AudioConnection voice8WavePatch(voices[8].wave, 0, voices[8].env, 0); AudioConnection voice8EnvPatch(voices[8].env, 0, mixer2, 0);
+AudioConnection voice9WavePatch(voices[9].wave, 0, voices[9].env, 0); AudioConnection voice9EnvPatch(voices[9].env, 0, mixer2, 1);
+AudioConnection voice10WavePatch(voices[10].wave, 0, voices[10].env, 0); AudioConnection voice10EnvPatch(voices[10].env, 0, mixer2, 2);
+AudioConnection voice11WavePatch(voices[11].wave, 0, voices[11].env, 0); AudioConnection voice11EnvPatch(voices[11].env, 0, mixer2, 3);
+AudioConnection voice12WavePatch(voices[12].wave, 0, voices[12].env, 0); AudioConnection voice12EnvPatch(voices[12].env, 0, mixer3, 0);
+AudioConnection voice13WavePatch(voices[13].wave, 0, voices[13].env, 0); AudioConnection voice13EnvPatch(voices[13].env, 0, mixer3, 1);
+AudioConnection voice14WavePatch(voices[14].wave, 0, voices[14].env, 0); AudioConnection voice14EnvPatch(voices[14].env, 0, mixer3, 2);
+AudioConnection voice15WavePatch(voices[15].wave, 0, voices[15].env, 0); AudioConnection voice15EnvPatch(voices[15].env, 0, mixer3, 3);
 
 float calculateStela(uint16_t grado, uint16_t arko)
 {
@@ -57,7 +75,8 @@ String tuningBuffer = "";
 
 Koro koro;
 Panel panel(koro);
-Controller controller(mono);
+ControllerMode synthMode = poly;
+Controller controller(synthMode);
 
 void setup() {
   setupSerial();
@@ -74,11 +93,11 @@ void setup() {
 
 void setupSerial()
 {
-    Serial.begin(9600);
+  Serial.begin(9600);
 
-    while(!Serial) {delay(100);}
-    Serial.println("Brightwave Organ");
-    Serial.println("Setup Serial OK");
+  while(!Serial) {delay(100);}
+  Serial.println("Brightwave Organ");
+  Serial.println("Setup Serial OK");
 }
 
 void setupAudio()
@@ -90,16 +109,36 @@ void setupAudio()
   AudioProcessorUsageMaxReset();
   AudioMemoryUsageMaxReset();
 
-  leftMixer.gain(0, 1.0);
-  leftMixer.gain(1, 0.0);
+  leftMixer.gain(0, 0.5);
+  leftMixer.gain(1, 0.5);
   leftMixer.gain(2, 0.0);
   leftMixer.gain(3, 0.0);
   
-  rightMixer.gain(0, 1.0);
-  rightMixer.gain(1, 1.0);
-  rightMixer.gain(2, 1.0);
-  rightMixer.gain(3, 1.0);
+  rightMixer.gain(0, 0.5);
+  rightMixer.gain(1, 0.5);
+  rightMixer.gain(2, 0.0);
+  rightMixer.gain(3, 0.0);
 
+  mixer0.gain(0, 0.25);
+  mixer0.gain(1, 0.25);
+  mixer0.gain(2, 0.25);
+  mixer0.gain(3, 0.25);
+
+  mixer1.gain(0, 0.25);
+  mixer1.gain(1, 0.25);
+  mixer1.gain(2, 0.25);
+  mixer1.gain(3, 0.25);  
+
+  mixer2.gain(0, 0.25);
+  mixer2.gain(1, 0.25);
+  mixer2.gain(2, 0.25);
+  mixer2.gain(3, 0.25);
+
+  mixer3.gain(0, 0.25);
+  mixer3.gain(1, 0.25);
+  mixer3.gain(2, 0.25);
+  mixer3.gain(3, 0.25);
+  
   Serial.println("Setup Audio OK");
 }
 
@@ -111,9 +150,9 @@ void setupPanel()
 
 void setupI2C()
 {
-    Wire.begin(); //Join I2C bus  
+  Wire.begin(); //Join I2C bus  
 
-    Serial.println("Setup I2C OK");    
+  Serial.println("Setup I2C OK");    
 }
 
 void setupKeypad()
@@ -167,7 +206,9 @@ void loop()
 
     // Ignore vento rising/falling on retune.
     Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
-    voice1.setTone(tone);    
+
+    // FIXME - poly mode
+    voices[0].setTone(tone);    
 
     // If we can hear the retuned note, then it becomes the last note we heard.
     if (panel.gate)
@@ -180,7 +221,9 @@ void loop()
   {
     // When we change the vento, we take into account the vento rising/falling.
     Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
-    voice1.setTone(tone);    
+
+    // FIXME - poly mode
+    voices[0].setTone(tone);    
 
     // If we can hear the reratioed note, then it becomes the last note we heard.
     if (panel.gate)
@@ -196,14 +239,15 @@ void loop()
     if (panel.gate)
     {
       Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
-      voice1.setTone(tone);
-      panel.koro.last = tone;
-      
-      voice1.on();
+
+      // FIXME - poly mode
+      voices[0].setTone(tone);
+      voices[0].on();
+      panel.koro.last = tone;      
     }
     else
     {
-      voice1.off();
+      voices[0].off();
     }
   }
   
@@ -215,50 +259,49 @@ void loop()
 
   usbMIDI.read(); 
 
-  if (controller.changed[0])
+  switch (synthMode)
   {
-    if (controller.voices[0].on)
-    {
-//      panel.lcd.setCursor(0, 1);
-//      panel.lcd.print("Vento ");
-//      panel.lcd.print(controller.voices[0].vento.du);
-//      panel.lcd.print(" ");
-//      panel.lcd.print(controller.voices[0].vento.tri);
-//      panel.lcd.print(" ");
-//      panel.lcd.print(controller.voices[0].vento.kvin);
-//      panel.lcd.print(" ");
-//      panel.lcd.print(controller.voices[0].vento.sep);
-//      panel.lcd.print("Fundamental ");
-//      panel.lcd.print(panel.koro.fundamental.getStela());
-      
-      Stela tone = controller.voices[0].vento.getTone(panel.koro.fundamental);
+    case mono:
+      if (controller.changed[0])
+      {
+        if (controller.voices[0].on)
+        {          
+          Stela tone = controller.voices[0].vento.getTone(panel.koro.fundamental);
+          
+          voices[0].setTone(tone);
+          voices[0].on();
+        }
+        else
+        {
+          voices[0].off();      
+        }
+        
+        controller.resetChanged();
+      }
 
-//      panel.lcd.setCursor(0, 2);
-//      panel.lcd.print("Grado ");
-//      panel.lcd.print(panel.koro.fundamental.grado);
-//      panel.lcd.print(" ");
-//      panel.lcd.print(tone.grado);
-
-//      panel.lcd.setCursor(0, 3);
-//      panel.lcd.print("Stela ");
-//      panel.lcd.print(panel.koro.fundamental.getStela());
-//      panel.lcd.print(" ");
-//      panel.lcd.print(tone.getStela());
-//      panel.lcd.print(" ");
-//      panel.lcd.print(panel.koro.fundamental.getStela() < tone.getStela());
+    case poly:
+      for (int index = 0; index < 16; index++)
+      {
+        if (controller.changed[index])
+        {
+          if (controller.voices[index].on)
+          {
+            Stela tone = controller.voices[index].vento.getTone(panel.koro.fundamental);          
+            voices[index].setTone(tone);
+            voices[index].on();
+          }
+          else
+          {
+            voices[index].off();      
+          }      
+        }  
+      }
       
-      voice1.setTone(tone);
-      voice1.on();
-    }
-    else
-    {
-      voice1.off();      
-    }
-    
-    controller.resetChanged();
+      controller.resetChanged();    
+
+    default:
+      return;
   }
-
-//  delay(100);
 }
 
 void modeStartup()
@@ -420,9 +463,9 @@ void testTone()
   Serial.println("testTone()");
 
   // We ignore the vento rising/falling for test tones and we do not remember a test tone as the last note we heard.
-  voice1.setTone(panel.koro.getTone());    
+  voices[0].setTone(panel.koro.getTone());    
   
-  voice1.on();    
+  voices[0].on();    
   delay(1000);    
-  voice1.off();
+  voices[0].off();
 }

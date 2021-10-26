@@ -15,7 +15,7 @@ void Controller::handleNoteOff(byte channel, byte note, byte velocity)
   switch (mode)
   {
     case mono:
-      if (voices[0].on)
+      if (voices[0].on && note == lastNote)
       {
         voices[0].on = false;
         changed[0] = true;
@@ -24,6 +24,21 @@ void Controller::handleNoteOff(byte channel, byte note, byte velocity)
       {
         return;
       }
+      
+    case poly:
+    { // Curlies needed to let you declare a variable inside a case
+      int index = findVoice(note);
+      if (index == -1)
+      {
+        return;
+      }
+      else
+      {
+        voices[index].on = false;        
+        changed[index] = true;
+      }      
+    }
+      
     default:
       return;
   }  
@@ -34,6 +49,8 @@ void Controller::handleNoteOn(byte channel, byte note, byte velocity)
   switch (mode)
   {
     case mono:
+      lastNote = note;
+      
       if (voices[0].on)
       {
         Vento newVento = getVento(note);
@@ -46,9 +63,27 @@ void Controller::handleNoteOn(byte channel, byte note, byte velocity)
       else
       {
         voices[0].on = true;        
+        voices[0].note = note;
         voices[0].vento = getVento(note);
         changed[0] = true;
       }
+      
+    case poly:
+    { // Curlies needed to let you declare a variable inside a case
+      int index = allocateVoice();
+      if (index == -1)
+      {
+        return;
+      }
+      else
+      {
+        voices[index].on = true;        
+        voices[index].note = note;
+        voices[index].vento = getVento(note);
+        changed[index] = true;
+      }
+    }
+    
     default:
       return;
   }
@@ -215,4 +250,32 @@ void Controller::resetChanged()
   changed[13] = false;
   changed[14] = false;
   changed[15] = false;
+}
+
+int Controller::findVoice(byte note)
+{
+  for (int index = 0; index < 16; index++)
+  {
+    ControllerVoice voice = voices[index];
+    if (voice.on && (voice.note == note))
+    {
+      return index;
+    }
+  }  
+
+  return -1;
+}
+
+int Controller::allocateVoice()
+{
+  for (int index = 0; index < 16; index++)
+  {
+    ControllerVoice voice = voices[index];
+    if (!voice.on)
+    {
+      return index;
+    }
+  }
+
+  return -1;
 }

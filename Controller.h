@@ -56,6 +56,10 @@ class Controller
     
   private:
     ControllerMode mode;
+    byte lastNote;
+
+    int findVoice(byte note);
+    int allocateVoice();
 };
 
 #endif
