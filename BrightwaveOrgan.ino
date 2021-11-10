@@ -27,12 +27,25 @@ Mode mode = Startup;
 uint16_t grado = 7;
 uint16_t arko = 0;
 
+// Audio module initialization order is important, according to the Teensy docs
+
+// Inputs
+AudioInputUSB inputUSB;
+
+// Analyzers
+//AudioAnalyzeNoteFrequency noteFreq;
+AudioAnalyzeFFT1024 noteFreq;
+
+// Outputs
 AudioControlSGTL5000 codec;
 AudioOutputI2S output;
 AudioOutputUSB outputUSB; 
+AudioOutputAnalog analogOutput;
 
 AudioMixer4 leftMixer;  AudioConnection leftMixerPatch(leftMixer, 0, outputUSB, 0);
 AudioMixer4 rightMixer; AudioConnection rightMixerPatch(rightMixer, 0, outputUSB, 1);
+
+AudioConnection inputPatch(inputUSB, 0, noteFreq, 0);
 
 AudioMixer4 mixer0; AudioConnection mixer0Patch(mixer0, 0, leftMixer, 0);
 AudioMixer4 mixer1; AudioConnection mixer1Patch(mixer1, 0, leftMixer, 1);
@@ -113,7 +126,8 @@ void setup() {
   setupKeypad();
 
   panel.process();
-  panel.koro.setShift(panel.encoderACount);
+  panel.koro.setGradoShift(panel.encoderACount);
+  panel.koro.setArkoShift(panel.encoderBCount);
   testTone();
 }
 
@@ -130,10 +144,14 @@ void setupAudio()
 {
   AudioMemory(20);
   codec.enable();
+  codec.inputSelect(AUDIO_INPUT_LINEIN);
   codec.volume(0.45);    
 
   AudioProcessorUsageMaxReset();
   AudioMemoryUsageMaxReset();
+
+//  noteFreq.begin(0.15);  
+  noteFreq.windowFunction(AudioWindowHanning1024);
 
   leftMixer.gain(0, 0.36);
   leftMixer.gain(1, 0.36);
@@ -231,31 +249,51 @@ void loop()
     panel.retune = false;
 
     // Ignore vento rising/falling on retune.
-    Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
+    Stela tone = panel.koro.vento.getTone(panel.koro.getTone());
 
-    // FIXME - poly mode
-    voices[0].setTone(tone);    
-
-    // If we can hear the retuned note, then it becomes the last note we heard.
-    if (panel.gate)
+    switch (synthMode)
     {
-      panel.koro.last = tone;
+      case mono:
+        voices[0].setTone(tone);        
+        break;
+
+      case poly:
+        for (int index = 0; index < 16; index++)
+        {
+          // Adjust tone for the new fundamental frequency
+          Stela tone = controller.voices[index].vento.getTone(panel.koro.getTone());          
+          voices[index].setTone(tone);
+        }
+        break;
+
+      default:
+        break;
     }
   }
 
   if (panel.reratio)
   {
     // When we change the vento, we take into account the vento rising/falling.
-    Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
+    Stela tone = panel.koro.getTone();
 
-    // FIXME - poly mode
-    voices[0].setTone(tone);    
-
-    // If we can hear the reratioed note, then it becomes the last note we heard.
-    if (panel.gate)
+    switch (synthMode)
     {
-      panel.koro.last = tone;
-    }    
+      case mono:
+        voices[0].setTone(tone);    
+        break;
+
+      case poly:
+        for (int index = 0; index < 16; index++)
+        {
+          // Adjust tone for the new fundamental frequency
+          Stela tone = controller.voices[index].vento.getTone(panel.koro.getTone());          
+          voices[index].setTone(tone);
+        }        
+        break;
+
+      default:
+        break;
+    }
   }
 
   if (panel.trigger)
@@ -264,12 +302,10 @@ void loop()
 
     if (panel.gate)
     {
-      Stela tone = panel.koro.vento.getTone(panel.koro.fundamental);
+      Stela tone = panel.koro.getTone();
 
-      // FIXME - poly mode
       voices[0].setTone(tone);
       voices[0].on();
-      panel.koro.last = tone;      
     }
     else
     {
@@ -283,6 +319,36 @@ void loop()
     testTone();
   }
 
+  if (panel.autotune)
+  {
+    if (noteFreq.available())
+    {
+      float maxAmplitude = 0;
+      int maxIndex = -1;
+            
+      for(int binIndex = 0; binIndex < 1024; binIndex++)
+      {
+        float amplitude = noteFreq.read(binIndex);
+        if (amplitude > maxAmplitude)
+        {
+          maxAmplitude = amplitude;
+          maxIndex = binIndex;        
+        }
+      }
+
+      float sampleRate = 44100.0; // Hardcoded for all of Teensy Audio library
+      float N = 1024.0; // Hardcoded for the FFT implementation
+      float binNumber = float(maxIndex);
+      float binSize = (sampleRate / 2) / N; // How many hertz each bin covers
+      float lowerHertz = binNumber * binSize; // bin number * bin size = hertz of lower range of bin
+      float upperHertz = (binNumber + 1) * binSize;
+      float centerHertz = (lowerHertz + upperHertz) / 2;
+            
+      panel.autotuneHertz = centerHertz;
+      panel.koro.setStartHertz(centerHertz);
+    }
+  }
+
   usbMIDI.read(); 
 
   switch (synthMode)
@@ -292,7 +358,7 @@ void loop()
       {
         if (controller.voices[0].on)
         {          
-          Stela tone = controller.voices[0].vento.getTone(panel.koro.fundamental);
+          Stela tone = controller.voices[0].vento.getTone(panel.koro.getTone());
           
           voices[0].setTone(tone);
           voices[0].on();
@@ -313,7 +379,10 @@ void loop()
         {
           if (controller.voices[index].on)
           {
-            Stela tone = controller.voices[index].vento.getTone(panel.koro.fundamental);          
+            Serial.println(panel.koro.getTone().getFloat());
+            Stela tone = controller.voices[index].vento.getTone(panel.koro.getTone());          
+            Serial.println(panel.koro.getTone().getFloat());
+            Serial.println(tone.getFloat());
             voices[index].setTone(tone);
             voices[index].on();
           }

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Panel.h"
+#include "Wheel.h"
 
 Panel::Panel(Koro koro): koro(koro)
 { 
@@ -37,7 +38,7 @@ void Panel::setupEncoders()
     return;
   }
 
-  if (!encoderB.begin())
+  if (!encoderB.begin(Wire, (uint8_t)0x45))
   {
     Serial.println("Encoder B FAIL");
     return;
@@ -48,6 +49,9 @@ void Panel::setupEncoders()
     Serial.println("Encoder C FAIL");
     return;
   }
+
+  encoderAZero = encoderA.getCount();
+  encoderBZero = encoderB.getCount();
 
   Serial.println("Setup Encoders OK");  
 }
@@ -86,25 +90,27 @@ void Panel::process()
   reratio = false;
   rejoy = false;
   
-  int newCount = encoderA.getCount();
-  if (newCount != encoderACount)
+  int newCountA = encoderA.getCount() - encoderAZero;
+  if (newCountA != encoderACount)
   {
     update = true;
     retune = true;    
-    
-    if (newCount > encoderACount)
-    {
-      retuneIsRising = true;
-    }
-    else
-    {
-      retuneIsRising = false;
-    }
-    
-    encoderACount = newCount;
+        
+    encoderACount = newCountA;
 
-    koro.setShift(encoderACount);
+    koro.setGradoShift(encoderACount);
   }
+
+  int newCountB = encoderB.getCount() - encoderBZero;
+  if (newCountB != encoderBCount)
+  {
+    update = true;
+    retune = true;    
+        
+    encoderBCount = newCountB;
+    
+    koro.setArkoShift(encoderBCount);    
+  }  
 
   bool newEncoderAPressed = encoderA.isPressed(); 
   if (newEncoderAPressed != encoderAPressed)
@@ -126,6 +132,16 @@ void Panel::process()
     int temp = newHorizontal;
     newHorizontal = newVertical;
     newVertical = temp;
+  }
+
+  if (joyFlipVertical)
+  {
+    newVertical = 1023 - newVertical;    
+  }
+
+  if (joyFlipHorizontal)
+  {
+    newHorizontal = 1023 - newHorizontal;
   }
   
   if (newHorizontal != horizontal)
@@ -152,18 +168,31 @@ void Panel::process()
     blueArcadeButtonIsPressed = newBlueArcadeButtonIsPressed;
     
     update = true;
-    trigger = true;
-    gate = blueArcadeButtonIsPressed;
+    if (blueArcadeButtonIsPressed)
+    {
+      autotune = true;
+      lastUpdate = 0;
+    }
+    else
+    {
+      autotune = false;
+      encoderAZero = encoderA.getCount();
+      encoderBZero = encoderB.getCount();
+    }
   }
 
   bool newRedArcadeButtonIsPressed = redArcadeButton.isPressed();
   if (newRedArcadeButtonIsPressed != redArcadeButtonIsPressed)
   {
     redArcadeButtonIsPressed = newRedArcadeButtonIsPressed;
-    
+
     update = true;
-    trigger = true;
-    gate = redArcadeButtonIsPressed;
+    if (redArcadeButtonIsPressed)
+    {
+      retune = true;
+
+      koro.vento.shiftDu(-1);
+    }
   }
 
   if (rejoy)
@@ -175,7 +204,36 @@ void Panel::process()
     }
   }
 
-  if (update)
+  if (autotune)
+  {
+    int now = millis();
+    int interval = now - lastUpdate;
+
+    bool autoUpdate = false;
+
+    if (lastUpdate == 0)
+    {
+      autoUpdate = true;
+    }
+
+    if (lastAutoHertz != autotuneHertz)
+    {
+      if (interval >= 500)
+      {
+        autoUpdate = true;      
+      }
+    }
+
+    if (autoUpdate)
+    {
+      lastUpdate = now;
+      lastAutoHertz = autotuneHertz;
+    
+      updateAutotune();
+      updateEncoders();
+    }
+  }
+  else if (update)
   {
     updateDisplay();
     updateEncoders();
@@ -189,23 +247,23 @@ void Panel::updateDisplay()
   
   lcd.setCursor(0, 1);
   lcd.print("Stela ");
-  lcd.print(koro.fundamental.getStela());
+  lcd.print(koro.getFundamental().getFloat());
   lcd.print(" ");
   lcd.print("Hz ");
-  lcd.print(int(koro.fundamental.hertz));  
+  lcd.print(int(koro.getFundamental().hertz));  
 
   Ratio ratio = koro.vento.getRatio();
   lcd.setCursor(0, 2);
-//  lcd.print("Vento ");
-//  lcd.print(koro.vento.tri);
-//  lcd.print(" ");
-//  lcd.print(koro.vento.kvin);
-  lcd.print("Ratio ");
-  lcd.print(ratio.numerator);
+  lcd.print("Vento ");
+  lcd.print(koro.vento.tri);
   lcd.print(" ");
-  lcd.print(ratio.denominator);
+  lcd.print(koro.vento.kvin);
+//  lcd.print("Ratio ");
+//  lcd.print(ratio.numerator);
+//  lcd.print(" ");
+//  lcd.print(ratio.denominator);
 
-  Stela tone = koro.vento.getTone(koro.fundamental);
+  Stela tone = koro.vento.getTone(koro.getFundamental());
   lcd.setCursor(11, 2);
   lcd.print("Hz");
   lcd.setCursor(14, 2);
@@ -230,33 +288,48 @@ void Panel::updateDisplay()
     lcd.print("O");    
   }
 
-  if (octaveLock)
+  if (autotune)
   {
     lcd.setCursor(16, 3);
-    lcd.print("Lock");
+    lcd.print("Auto");
   }
+}
+
+void Panel::updateAutotune()
+{
+  lcd.clear();
+  lcd.print("Brightwave Organ");    
+
+  Stela autoStela = Stela(autotuneHertz);
+  
+  lcd.setCursor(0, 1);
+  lcd.print("Stela ");
+  lcd.print(autoStela.getFloat());
+  lcd.print(" ");
+  lcd.print("Hz ");
+  lcd.print(int(autotuneHertz));
 }
 
 void Panel::updateEncoders()
 {
-  float toneMin = 5.0;
-  float toneMax = 9.0;
+  int gradoMin = 5;
+  int gradoMax = 9;
   
-  float tone = koro.fundamental.getStela(); // unsigned float 5.0-12.0
-  if (tone < toneMin)
+  int grado = koro.getFundamental().grado;
+  if (grado < gradoMin)
   {
-    tone = toneMin;
+    grado = gradoMin;
   }
 
-  if (tone > toneMax)
+  if (grado > gradoMax)
   {
-    tone = toneMax;
+    grado = gradoMax;
   }
   
-  float toneRange = toneMax - toneMin;
-  float colorRange = 255.0;
+  int gradoRange = gradoMax - gradoMin;
+  int colorRange = 255;
   int colorMax = 255;
-  float color = ((tone - toneMin) / toneRange) * colorRange;
+  int color = ((grado - gradoMin) * colorRange) / gradoRange;
   int quantizedColor = int(color);
   
   int blueLevel = quantizedColor;
@@ -268,6 +341,10 @@ void Panel::updateEncoders()
   }
   
   encoderA.setColor(redLevel, greenColor, blueLevel); //Set Red and Blue LED brightnesses to half of max.
+
+  float arko = koro.getFundamental().arko;
+  RGB color2 = Wheel(arko, 0.5);
+  encoderB.setColor(color2.R, color2.G, color2.B);  
 }
 
 bool Panel::updateJoystick()

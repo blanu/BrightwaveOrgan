@@ -16,33 +16,17 @@ class Koro
     Koro();
     virtual ~Koro();
 
-    Stela fundamental = Stela(7, 0.0);
-    Stela last = fundamental;
     Vento vento = Vento();
-    
-    void setShift(int newShift);
-    
-    void setRatio(int numerator, int denominator);
-    Ratio getRatio();
 
+    void setStartHertz(float hertz);
+    void setArkoShift(int newArkoShift);    
+    void setGradoShift(int newGradoShift);
+    Stela getFundamental();
     Stela getTone();
-
-    Ratio lockedTuning[3][3] = {
-      {Ratio(5, 3), Ratio(5, 4), Ratio(3*5, 8)},      
-      {Ratio(4, 3), Ratio(1, 1), Ratio(3, 2)},      
-      {Ratio(16, 3*5), Ratio(8, 5), Ratio(6, 5)}
-    };    
-
-    Ratio unlockedTuning[3][3] = {
-      {Ratio(5, 3), Ratio(5, 1), Ratio(3*5, 1)},      
-      {Ratio(1, 3), Ratio(1, 1), Ratio(3, 1)},      
-      {Ratio(1, 3*5), Ratio(1, 5), Ratio(3, 5)}
-    };        
-
   private:
-      Stela start = Stela(7, 0.0);
-      int shift = 0;
-      Ratio ratio = Ratio(1, 1);
+    Stela start = Stela(7, 0.0);
+    int arkoShift = 0;
+    int gradoShift = 0;
 };
 
 #endif

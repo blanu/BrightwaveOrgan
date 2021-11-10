@@ -10,25 +10,45 @@ Koro::~Koro()
 {
 }
 
-void Koro::setShift(int newShift)
+void Koro::setStartHertz(float hertz)
 {
-  float arkoShift = float(newShift) / 100.0f;
-  float oldStela = start.getStela();
-  float newStela = oldStela + arkoShift;
-  fundamental.setStela(newStela);  
+  start = Stela(hertz);
 }
 
-void Koro::setRatio(int numerator, int denominator)
+void Koro::setArkoShift(int newArkoShift)
 {
-  ratio = Ratio(numerator, denominator);
+  arkoShift = newArkoShift;
 }
 
-Ratio Koro::getRatio()
+void Koro::setGradoShift(int newGradoShift)
 {
-  return ratio;
+  gradoShift = newGradoShift;
+}
+
+Stela Koro::getFundamental()
+{
+  float grado = float(start.grado) + gradoShift;
+
+  int modShift = arkoShift % 100;
+  float floatArkoShift = float(modShift) / 100.0;
+  
+  float arko = start.arko + floatArkoShift;
+    
+  if (arko > 1.0)
+  {
+    arko = arko - 1.0;
+  }
+
+  if (arko < 0)
+  {
+    arko = arko + 1.0;
+  }
+
+  return Stela(grado, arko);
 }
 
 Stela Koro::getTone()
 {
-  return fundamental.multiply(ratio);
+  Stela fundamental = getFundamental();
+  return vento.getTone(fundamental);
 }

@@ -66,12 +66,12 @@ Stela Vento::getRising(Stela fundamental, Stela reference)
 {
   Stela result = getStela(fundamental);
 
-  while (result.getStela() > reference.getStela())
+  while (result.getFloat() > reference.getFloat())
   {
     result.setGrado(result.grado - 1);
   }
 
-  while (result.getStela() < reference.getStela())
+  while (result.getFloat() < reference.getFloat())
   {
     result.setGrado(result.grado + 1);
   }
@@ -83,12 +83,12 @@ Stela Vento::getFalling(Stela fundamental, Stela reference)
 {
   Stela result = getStela(fundamental);
 
-  while (result.getStela() < reference.getStela())
+  while (result.getFloat() < reference.getFloat())
   {
     result.setGrado(result.grado + 1);
   }
 
-  while (result.getStela() > reference.getStela())
+  while (result.getFloat() > reference.getFloat())
   {
     result.setGrado(result.grado - 1);
   }
@@ -100,8 +100,8 @@ Stela Vento::getTone(Stela fundamental)
 {
   Stela harmonic = getStela(fundamental);
   
-  float fstela = fundamental.getStela();
-  float hstela = harmonic.getStela();
+  float fstela = fundamental.getFloat();
+  float hstela = harmonic.getFloat();
 
   if (fstela == hstela)
   {
@@ -141,6 +141,11 @@ Stela Vento::getTone(Stela fundamental)
   }
 
   return harmonic;    
+}
+
+void Vento::shiftDu(int shift)
+{
+  du = du + shift;
 }
 
 void Vento::shiftTri(int shift)

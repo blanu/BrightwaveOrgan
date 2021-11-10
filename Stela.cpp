@@ -24,6 +24,16 @@ Stela::~Stela()
 void Stela::setGrado(int newGrado)
 {
   grado = newGrado;
+
+  if (grado > 12)
+  {
+    grado = 12;
+  }
+  
+  if (grado < 0)
+  {
+    grado = 0;
+  }
   
   stela = ((float)grado) + arko;
   
@@ -44,12 +54,20 @@ void Stela::setArko(float newArko)
   hertz = pow(2, stela);  
 }
 
-float Stela::getStela()
+void Stela::setHertz(float newHertz)
+{
+  hertz = newHertz;  
+  stela = (float)log2(hertz);
+  grado = (int)stela;
+  arko = stela - grado;
+}
+
+float Stela::getFloat()
 {
   return stela;
 }
 
-void Stela::setStela(float newStela)
+void Stela::setFloat(float newStela)
 {
   stela = newStela;
   grado = int(stela);

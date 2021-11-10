@@ -23,6 +23,7 @@ class Panel
 
     int encoderACount = 0;
     bool encoderAPressed = false;
+    int encoderBCount = 0;
 
     bool tone = false;
     bool retune = false;
@@ -34,6 +35,8 @@ class Panel
     bool centered = true;
     bool rejoy = false;
     bool rising = true;
+    bool autotune = false;
+    float autotuneHertz = 0.0;
 
     int horizontal = 0;
     int vertical = 0;
@@ -46,14 +49,23 @@ class Panel
     Koro koro;
 
   private:
+    int lastUpdate = 0;
+    float lastAutoHertz = 0.0;
+    
     TWIST encoderA;
     TWIST encoderB;
     TWIST encoderC;    
+
+    int encoderAZero;
+    int encoderBZero;
+    
     JOYSTICK joystick;
     QwiicButton blueArcadeButton;
     QwiicButton redArcadeButton;
   
     bool joySwapAxes = true;
+    bool joyFlipVertical = false;
+    bool joyFlipHorizontal = true;
   
     void setupEncoders();
     void setupJoystick();
@@ -63,6 +75,7 @@ class Panel
     void updateEncoders();
     bool updateJoystick();
     void updateDisplay();
+    void updateAutotune();
 
     bool joySoftQuantize();
     bool joyHardQuantize();

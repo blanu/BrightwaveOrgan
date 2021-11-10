@@ -17,11 +17,12 @@ class Stela
 
     void setGrado(int newGrado);
     void setArko(float newArko);
+    void setHertz(float hertz);
 
     void shiftGrado(int shift);
     
-    float getStela();
-    void setStela(float newStela);
+    float getFloat();
+    void setFloat(float newStela);
 
     Stela multiply(Ratio ratio);
 
